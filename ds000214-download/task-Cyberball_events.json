@@ -1,0 +1,14 @@
+{
+  "trial_type": {
+    "Levels": {
+      "0inc_excluded": "Block: 0% inclusion. Trial: participant excluded.",
+      "33inc_excluded": "Block: 33% inclusion. Trial: participant excluded.",
+      "33inc_included": "Block: 33% inclusion. Trial: participant included.",
+      "66inc_excluded": "Block: 66% inclusion. Trial: participant excluded.",
+      "66inc_included": "Block: 66% inclusion. Trial: participant included.",
+      "100inc_excluded": "Block: 100% inclusion. Trial: participant excluded.",
+      "100inc_included": "Block: 100% inclusion. Trial: participant included."
+    }
+  }
+}
+

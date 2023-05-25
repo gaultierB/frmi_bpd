@@ -1,0 +1,98 @@
+Participants
+Twenty people with borderline personality disorder were recruited from outpatient and support 
+services from around Edinburgh, Scotland. Diagnoses were confirmed using the Structured Clinical 
+Interview for DSM-IV (SCID-II). Current symptoms were assessed using the Zanarini Rating Scale 
+for Borderline Personality Disorder (ZAN-BPD [1]). Adverse childhood events were assessed using 
+the Childhood Trauma Questionnaire (CTQ [2]). Fifteen BPD participants were receiving antidepressant 
+medication and twelve were taking antipsychotic medication. Twenty age- and sex-matched controls 
+were recruited from the community, however four were excluded due to technical issues during 
+scanning, leaving sixteen controls. Exclusion criteria for all participants included pregnancy, 
+MRI contraindications, diagnosis of a psychotic disorder, previous head injury or current 
+illicit substance dependence. Controls met the additional criteria of no personal or familial 
+history of major mental illness. Ethical approval was obtained from the Lothian National 
+Health Service Research Ethics Committee, and all participants provided written informed 
+consent before taking part. 
+
+Experimental task
+Participants performed the Cyberball social exclusion task [3] during functional magnetic 
+resonance imaging (fMRI), adapted from a previous implementation by Kumar et al 2009 [4]. 
+The task involves playing “catch” with two computer-controlled players, during which the 
+participant can be systematically included or excluded from the game.  We used this task as 
+it assesses neural responses to social exclusion, is known to activate a range of social 
+brain regions [5] and is amenable to reinforcement learning modelling [4]. The task was 
+modified such that inclusion was varied parametrically over four levels: 0%, 33%, 66% and 
+100%, achieved by arranging the task into blocks of nine throws, respectively involving zero, 
+one, two or three throws to the participant. Here, 100% inclusion means the degree to which 
+the participant was included was equal to that of the other two players, with each receiving 
+three throws per nine-throw block. Participants were asked to imagine that the other players 
+were real, as exclusion by both human or simulated players has been previously reported to 
+be similarly distressing [6-8]. When the participant received the ball, they indicated which 
+computer player they wished to throw the ball to with a button press. There were four 
+repetitions of each inclusion level, providing 16 experimental blocks in total, with the 
+first block being 100% inclusion, and all subsequent blocks being randomised. Each throwing 
+event had a mean duration of 2700ms, with each being preceded by randomised jitter that was 
+in part adjusted to accommodate the participant’s reaction time from the previous trial, 
+when applicable. This was achieved by comparing the total duration of the previous trial, 
+including reaction time, with the ideal trial time of 2700ms: if this value was exceeded, 
+a random jitter between 0 and 1000ms was subtracted from the mean jitter time of 1500ms; 
+otherwise, the random jitter was added to 1500ms. Jitter therefore varied between 500ms and 
+2500ms. Mean block duration was 24s, with onsets denoted by the appearance of the cartoon 
+figures following rest, and offsets by the conclusion of the final throw animation. Blocks 
+were randomized, and interleaved with 13s rest blocks. Within blocks, throwing events were 
+jittered to permit event disambiguation for reinforcement learning analysis. 
+
+Neuroimaging
+Scanning took place at the Clinical Research Imaging Centre in Edinburgh, using a 3T Siemens 
+Magnetom Verio scanner. Echo Planar Blood Oxygen Level Dependent images were acquired axially 
+with a TR 1560ms, TE 26ms, flip angle 66’, field of view 220 x 220mm, in-plane resolution 
+64 x 64, 26 interleaved slices, 347 volumes, resolution 3.4 x 3.4 x 5mm. A high resolution 
+T1 MPRAGE structural image was acquired with TR 2300ms, TE 2.98ms, flip angle 90’, field of 
+view 256 x 256mm, in-plane resolution 256 x 256, 160 interleaved slices, resolution 1 x 1 x 1mm. 
+
+References
+1 Zanarini MC, Vujanovic AA, Parachini EA, Boulanger JL, Frankenburg FR, Hennen J. Zanarini Rating Scale for Borderline Personality Disorder (ZAN-BPD): a continuous measure of DSM-IV borderline psychopathology. J Pers Disord 2003; 17: 233–242
+2 Bernstein DP, Fink L. Childhood trauma questionnaire: A retrospective self-report: Manual. Psychological Corporation, 1998.
+3 Williams KD, Cheung CK, Choi W. Cyberostracism: effects of being ignored over the Internet. J Pers Soc Psychol 2000; 79: 748–762.
+4 Kumar P, Waiter G, Ahearn TS, Milders M, Reid I, Steele JD. Frontal operculum temporal difference signals and social motor response learning. Hum Brain Mapp 2009; 30: 1421–1430.
+5 Eisenberger NI, Lieberman MD, Williams KD. Does rejection hurt? An FMRI study of social exclusion. Science 2003; 302: 290–292.
+6 Zadro L, Williams KD, Richardson R. How low can you go? Ostracism by a computer is sufficient to lower self-reported levels of belonging, control, self-esteem, and meaningful existence. Journal of Experimental Social Psychology 2004; 40: 560–567.
+7 Sebastian CL, Tan GCY, Roiser JP, Viding E, Dumontheil I, Blakemore S-J. Developmental influences on the neural bases of responses to social rejection: implications of social neuroscience for education. NeuroImage 2011; 57: 686–694.
+8 Gradin VB, Waiter G, Kumar P, Stickle C, Milders M, Matthews K et al. Abnormal neural responses to social exclusion in schizophrenia. PLoS ONE 2012; 7: e42608.
+
+
+### Comments added by Openfmri Curators ###
+===========================================
+
+Defacing
+--------
+Defacing was performed by the submitter.
+
+Quality Control
+---------------
+Mriqc output was not run on this dataset due to issues we are having with the software. It 
+will be included in the next revision.
+
+Where to discuss the dataset
+----------------------------
+1) www.openfmri.org/dataset/ds******/ See the comments section at the bottom of the dataset
+page.
+2) www.neurostars.org Please tag any discussion topics with the tags openfmri and dsXXXXXX
+accession number.
+3) Send an email to submissions@openfmri.org. Please include the dsXXXXXX accession number 
+in
+your email.
+
+Bids-validator Output
+---------------------
+
+	1: This file is not part of the BIDS specification, make sure it isn't included in 
+the dataset by accident. Data derivatives (processed data) should be placed in /derivatives 
+folder. (code: 1 - NOT_INCLUDED)
+		/participants.json
+			Evidence: participants.json
+
+        Summary:                 Available Tasks:        Available Modalities:
+        116 Files, 2.01GB        Cyberball               T1w
+        36 - Subjects                                    bold
+        1 - Session
+
