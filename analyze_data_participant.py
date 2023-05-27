@@ -2,6 +2,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
+import json
 
 
 def get_patient(df):
@@ -61,7 +62,7 @@ def clear_no_drug(df):
 
 
 def box_graph(df, name_graph):
-    #TODO create colonne stat for usage drug
+    # TODO create colonne stat for usage drug
 
     # Créer une liste pour stocker les données de chaque colonne
     data = []
@@ -135,6 +136,37 @@ def graph_numeric_value(df, numeric_columns):
             plt.title(f'Relation entre {numeric_columns[i]} et {numeric_columns[j]}')
             plt.show()
 
+#TODO fix label
+def analyse_score_participants_zanarini(df, n_zanarini):
+    fichier_json = "ds000214-download/participants.json"
+
+    # Lecture du fichier JSON
+    with open(fichier_json, "r") as f:
+        donnees = json.load(f)
+    json_zanarini = donnees["Zanarini-" + n_zanarini]
+    # Utilisation des données
+    zanarini_label = list(json_zanarini["Levels"].values())
+    zanarini_data = df.get("Zanarini-" + n_zanarini)
+
+    # Comptage des occurrences de chaque niveau de symptôme
+    zanarini_data_count = pd.Series(0, index=[0, 1, 2, 3, 4])
+    value = zanarini_data.value_counts()
+    zanarini_data_count.update(value)
+
+    # Création du graphique à barres
+    plt.bar(zanarini_label, zanarini_data_count.values)
+
+    # Configuration des étiquettes sur l'axe des x
+    plt.xticks(zanarini_label, zanarini_label)
+
+    # Ajout de labels et de titre
+    plt.xlabel("NANI Zanarini-" + n_zanarini + " Score")
+    plt.ylabel("Count")
+    plt.title(json_zanarini["LongName"])
+    plt.text(0.5, -0.2, json_zanarini["Description"], transform=plt.gca().transAxes, ha='center')
+
+    # Affichage du graphique
+    plt.show()
 
 if __name__ == '__main__':
     df_all = pd.read_table('ds000214-download/participants.tsv')
@@ -144,10 +176,10 @@ if __name__ == '__main__':
     df_control = get_control(df_all)
     numeric_columns = df_all.select_dtypes(include=['int', 'float']).columns
     # pas lisible graph_cloud_point(df_all, numeric_columns)
-    box_graph(df_patient, 'Diagramme en boite des personnes patientes')
-    box_graph(df_control, 'Diagramme en boite des personnes controlés')
+    # box_graph(df_patient, 'Diagramme en boite des personnes patientes')
+    # box_graph(df_control, 'Diagramme en boite des personnes controlés')
     # heatmap(df_patient)
 
-    #TODO bar_chart(df_all)
-
     # histogram_phys_abuse(df_all)
+    for i in range(1, 10):
+        analyse_score_participants_zanarini(df_all, str(i))

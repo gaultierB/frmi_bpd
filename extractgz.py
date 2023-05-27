@@ -17,8 +17,7 @@ if __name__ == '__main__':
         next(reader)  # Ignorer la première ligne d'en-tête
 
         for row in reader:
-            participant_name = row[0]
-            print(participant_name)# Récupérer le nom du participant depuis la 4ème colonne
-            input_file = participant_name + '.gz'  # Construire le chemin du fichier gzip
-            output_file = row[3] + '/' + participant_name + '.nii'  # Chemin vers le fichier de sortie extrait
+            participant_name = "sub-" + row[0]
+            input_file = participant_name + '/anat/' + participant_name + '_T1w.nii' + '.gz'  # Construire le chemin du fichier gzip
+            output_file = row[3] + '/' + participant_name + 'TEZST.nii'  # Chemin vers le fichier de sortie extrait
             extract_gz_file(input_file, output_file)
