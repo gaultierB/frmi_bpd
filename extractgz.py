@@ -18,6 +18,14 @@ if __name__ == '__main__':
 
         for row in reader:
             participant_name = "sub-" + row[0]
-            input_file = participant_name + '/anat/' + participant_name + '_T1w.nii' + '.gz'  # Construire le chemin du fichier gzip
+            input_file = "ds000214-download/" + participant_name + '/anat/' + participant_name + '_T1w.nii' + '.gz'  # Construire le chemin du fichier gzip
+            output_file = row[3] + '/' + participant_name + 'TEZST.nii'  # Chemin vers le fichier de sortie extrait
+            extract_gz_file(input_file, output_file)
+
+            input_file = "ds000214-download/" + participant_name + '/func/' + participant_name + '_task-Cyberball_bold.nii' + '.gz'  # Construire le chemin du fichier gzip
+            output_file = row[3] + '/' + participant_name + 'TEZST.nii'  # Chemin vers le fichier de sortie extrait
+            extract_gz_file(input_file, output_file)
+
+            input_file = "ds000214-download/" + participant_name + '/func/' + participant_name + '_task-Cyberball_bold.tsv'  # Construire le chemin du fichier gzip
             output_file = row[3] + '/' + participant_name + 'TEZST.nii'  # Chemin vers le fichier de sortie extrait
             extract_gz_file(input_file, output_file)
