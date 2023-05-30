@@ -182,4 +182,7 @@ if __name__ == '__main__':
 
     # histogram_phys_abuse(df_all)
     for i in range(1, 10):
+        #TODO EXCLUDE AGE
         analyse_score_participants_zanarini(df_all, str(i))
+
+#TODO PCA
