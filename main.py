@@ -74,7 +74,7 @@ def BET(folders, output_files_T1w):
 
 
 if __name__ == "__main__":
-    output_files_Cyberball, output_files_T1w, output_folders BET= extractgz.get_list_filename()
+    output_files_Cyberball, output_files_T1w, output_folders = extractgz.get_list_filename()
     print(output_folders, output_files_T1w)
     BET(output_folders, output_files_T1w)
 
