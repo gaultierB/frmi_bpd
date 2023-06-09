@@ -1,3 +1,5 @@
+import os
+
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -70,7 +72,7 @@ def box_graph(df, name_graph):
     # Itérer sur chaque colonne du DataFrame et ajouter les données à la liste
     numeric_columns = []
     for column in df.columns:
-        if df[column].dtype == 'float64' or df[column].dtype == 'int64':
+        if df[column].dtype == 'float64' or df[column].dtype == 'int64' and column != "age":
             data.append(df[column].dropna().values)
             numeric_columns.append(column)
 
@@ -81,15 +83,14 @@ def box_graph(df, name_graph):
     ax.boxplot(data)
 
     # Ajouter des étiquettes d'axe x pour chaque colonne
-    ax.set_xticklabels(numeric_columns, rotation=45, ha='right')
+    ax.set_xticklabels(numeric_columns, rotation=45, ha='right', fontsize=6)
 
     # Personnaliser le plot
     ax.set_xlabel('Colonnes')
     ax.set_ylabel('Valeurs')
     ax.set_title(name_graph)
-
-    # Afficher le plot
-    plt.show()
+    fig.savefig(name_graph + '.png')
+    plt.close(fig)
 
 
 def graph_cloud_point(df, numeric_columns):
@@ -136,7 +137,8 @@ def graph_numeric_value(df, numeric_columns):
             plt.title(f'Relation entre {numeric_columns[i]} et {numeric_columns[j]}')
             plt.show()
 
-#TODO fix label
+
+# TODO fix label
 def analyse_score_participants_zanarini(df, n_zanarini):
     fichier_json = "ds000214-download/participants.json"
 
@@ -168,21 +170,43 @@ def analyse_score_participants_zanarini(df, n_zanarini):
     # Affichage du graphique
     plt.show()
 
+
+def get_json_participant():
+    fichier_json = "ds000214-download/participants.json"
+
+    # Lecture du fichier JSON
+    with open(fichier_json, "r") as f:
+        return json.load(f)
+
+
+def pretty_show_column(df):
+    columns = df.columns
+    data = get_json_participant()
+    print(data)
+    for column in columns:
+        name = column
+        description = ""
+        if column in data:
+            if "LongName" in data[column].keys():
+                name = data[column]["LongName"]
+            if "Description" in data[column].keys():
+                description = data[column]["Description"]
+        print("Nom colonne : " + name + " Type : " + str(df[column].dtype) + " Description : " + description)
+
+
 if __name__ == '__main__':
     df_all = pd.read_table('ds000214-download/participants.tsv')
     df_all = convert_type_all_df(df_all)
-    clear_no_drug(df_all)
+    pretty_show_column(df_all)
+    # clear_no_drug(df_all)
     df_patient = get_patient(df_all)
     df_control = get_control(df_all)
-    numeric_columns = df_all.select_dtypes(include=['int', 'float']).columns
+    # numeric_columns = df_all.select_dtypes(include=['int', 'float']).columns
     # pas lisible graph_cloud_point(df_all, numeric_columns)
-    # box_graph(df_patient, 'Diagramme en boite des personnes patientes')
-    # box_graph(df_control, 'Diagramme en boite des personnes controlés')
+    box_graph(df_patient, 'Diagramme en boite des personnes patientes')
+    box_graph(df_control, 'Diagramme en boite des personnes controlés')
     # heatmap(df_patient)
 
     # histogram_phys_abuse(df_all)
-    for i in range(1, 10):
-        #TODO EXCLUDE AGE
-        analyse_score_participants_zanarini(df_all, str(i))
-
-#TODO PCA
+    # for i in range(1, 10):
+    # analyse_score_participants_zanarini(df_all, str(i))
