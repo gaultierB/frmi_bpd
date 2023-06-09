@@ -13,6 +13,7 @@ def extract_gz_file(input_file_path, output_file_path):
 def get_list_filename():
     output_files_Cyberball = []
     output_files_T1w = []
+    output_folders = []
     participants_file = 'ds000214-download/participants.tsv'  # Chemin vers le fichier participants.tsv
     with open(participants_file, 'r') as f:
         reader = csv.reader(f, delimiter='\t')
@@ -20,12 +21,12 @@ def get_list_filename():
         for row in reader:
             participant_name = "/sub-" + row[0]
             output_folder = "data/" + row[3] + participant_name
+            output_folders.append(output_folder)
             output_file = output_folder + participant_name + '_T1w.nii'  # Chemin vers le fichier de sortie extrait
             output_files_T1w.append(output_file)
-
             output_file = output_folder + participant_name + '_task-Cyberball_bold.nii'  # Chemin vers le fichier de sortie extrait
             output_files_Cyberball.append(output_file)
-    return output_files_Cyberball, output_files_T1w
+    return output_files_Cyberball, output_files_T1w, output_folders
 
 
 if __name__ == '__main__':
