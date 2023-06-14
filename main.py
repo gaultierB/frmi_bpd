@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from fsl.wrappers import bet
 from fsl.wrappers import fslmaths
 import subprocess
+import json
 
 
 # https://socr.umich.edu/HTML5/BrainViewer/
@@ -73,7 +74,8 @@ def BET(folders, output_files_T1w):
 
 def run_mcflirt(folders, output_files_T1w):
     for folder, path_file in zip(folders, output_files_T1w):
-        output_image = "/mnt/c/Users/gault/PycharmProjects/frmi_bpd/" + folder + "/MCFLIRT" + path_file.replace(folder, "")
+        output_image = "/mnt/c/Users/gault/PycharmProjects/frmi_bpd/" + folder + "/MCFLIRT" + path_file.replace(folder,
+                                                                                                                "")
         folder = os.path.dirname(output_image)
         os.makedirs(folder, exist_ok=True)  # Create the folder if it doesn't exist
         # Execute MCFLIRT
@@ -85,15 +87,15 @@ def run_mcflirt(folders, output_files_T1w):
 def sclice_timing_correction(input_files, folders):
     tr = 3.0  # Temps de répétition (TR) en secondes
     ta = 1.0  # Temps d'acquisition (TA) de chaque tranche en secondes
-    # num_slices = 30  # Nombre de tranches dans vos images IRMF
     interleaved = True  # True si vos tranches sont acquises de manière entrelacée, False sinon
 
     # Parcourez chaque fichier d'IRMF et appliquez la correction de synchronisation des tranches
     for input_file, output_folder in zip(input_files, folders):
-        output_path = output_folder + "/SCLICE_TC" + input_file.replace(output_folder, "")
-        os.makedirs(output_path, exist_ok=True)  # Create the folder if it doesn't exist
+        output_image = output_folder + "/SCLICE_TC" + input_file.replace(output_folder, "")
+        folder = os.path.dirname(output_image)
+        os.makedirs(folder, exist_ok=True)  # Create the folder if it doesn't exist
         # Construisez la commande FSL pour la correction de synchronisation des tranches
-        cmd = f"slicetimer -i {input_file} -o {output_path} --odd --ocustom={output_path} --tcustom={tr} --repeat={ta}"
+        cmd = f"slicetimer -i {input_file} -o {output_image} --tcustom='/mnt/c/Users/gault/PycharmProjects/frmi_bpd/ds000214-download/waza.txt'"
         if interleaved:
             cmd += " --odd"
 
@@ -101,37 +103,53 @@ def sclice_timing_correction(input_files, folders):
         subprocess.call(cmd, shell=True)
 
         print(f"Correction de synchronisation des tranches terminée pour {input_file}")
-
     print("Toutes les corrections de synchronisation des tranches sont terminées.")
 
-
+#/mnt/c/Users/gault/PycharmProjects/frmi_bpd/datasetFSL/Control/IMAGE
 def spacial_smoothing(input_files, folders):
     for input_file, output_folder in zip(input_files, folders):
-        # Nom du fichier de sortie
-        output_path = output_folder + "/SCLICE_TC" + input_file.replace(output_folder, "")
-        output_file = "image_smoothed.nii.gz"
+        output_image = output_folder + "/SPACIAL_SMOOTHING" + input_file.replace(output_folder, "")
+        folder = os.path.dirname(output_image)
+        os.makedirs(folder, exist_ok=True)  # Create the folder if it doesn't exist
 
         # Taille de la fenêtre de lissage (en mm)
         smoothing_size = 5
 
         # Commande de lissage spatial avec FSL
-        # fsl_cmd = f"fslmaths {os.path.join(data_folder, input_file)} -s {smoothing_size} {os.path.join(data_folder, output_file)}"
+        fsl_cmd = f"fslmaths {input_file} -s {smoothing_size} {output_image}"
 
         # Exécution de la commande
-        # subprocess.call(fsl_cmd, shell=True)
+        subprocess.call(fsl_cmd, shell=True)
+        break
+
+
+def intensity_normalization(input_files, folders):
+    #TODO FIX
+    for input_file, output_folder in zip(input_files, folders):
+        output_image = output_folder + "/INTENISTY_NORMALIZATION" + input_file.replace(output_folder, "")
+        folder = os.path.dirname(output_image)
+        os.makedirs(folder, exist_ok=True)  # Create the folder if it doesn't exist
+        mean_value = subprocess.check_output("fslstats " + input_file + " -M", shell=True).decode().strip()
+        standard_deviation = subprocess.check_output("fslstats " + input_file + " -s", shell=True).decode().strip()
+        # Perform intensity normalization using fslmaths
+
+        subprocess.call("fslmaths " + input_file + " -sub " + str(mean_value) + " -div " + str(
+            standard_deviation) + " " + output_image, shell=True)
+        break
 
 
 if __name__ == "__main__":
-    # TODO analyse shape pour savoir qui est le IRM et l'IRMF
-    # Refaire les traitements sur le shape de 4
-
+    # TODO regarder le FEAT qui fais BET + MCFLIRT + Slice timing
     output_files_Cyberball, output_files_T1w, folders = extractgz.get_list_filename()
-    print(output_files_Cyberball)
-    print(output_files_T1w)
-    print(folders)
-    # BET(output_folders, output_files_T1w)
-    # run_mcflirt(output_folders, output_files_T1w)
-    sclice_timing_correction(output_files_T1w, folders)
+    # BET(output_folders, output_files_Cyberball)
+    # run_mcflirt(output_folders, output_files_Cyberball)
+    # sclice_timing_correction(output_files_Cyberball, folders)
+    # spacial_smoothing(output_files_Cyberball, folders)
+    # intensity_normalization(output_files_Cyberball, folders)
+    data = []
+
+    min_y = np.min(data, axis=3)
+
 
 # https://github.com/Project-MONAI/tutorials/blob/main/3d_segmentation/brats_segmentation_3d.ipynb
 # https://neuraldatascience.io/8-mri/nifti.html
