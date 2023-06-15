@@ -1,0 +1,17 @@
+flowchart LR
+    A{Pre Processing} --> B(Slice Timing Correction)
+    B --> C(Brain Extraction) --> D(spatial smoothing) --> E(intensity normalization)
+    E --> F(RegionGrowing) --> G(6x6x6)  --> H{Voxel Features}
+    H --> I(Maximum value) --> Z
+    H --> J(Minimum value) --> Z
+    H --> K(Peaks) --> Z
+    H --> M(Average intensity) --> Z
+    H --> N(Average intensity of peaks) --> Z
+    H --> O(Standard deviation of intensity values of peaks) --> Z
+    H --> P(Standar Deviation) --> Z
+    H --> Q(Skewness) --> Z
+    H --> R(Skewness of the highest peak) --> Z
+    H --> S(Kurtosis) --> Z
+    H --> T(Kurtosis of the highest peak) --> Z
+    H --> U(Peaks) --> Z
+    Z(Classification Algoritm)
