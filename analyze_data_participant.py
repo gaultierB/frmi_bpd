@@ -5,6 +5,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
 import json
+import openpyxl
 
 
 def get_patient(df):
@@ -182,7 +183,8 @@ def get_json_participant():
 def pretty_show_column(df):
     columns = df.columns
     data = get_json_participant()
-    print(data)
+    output_data = []
+
     for column in columns:
         name = column
         description = ""
@@ -191,20 +193,48 @@ def pretty_show_column(df):
                 name = data[column]["LongName"]
             if "Description" in data[column].keys():
                 description = data[column]["Description"]
-        print("Nom colonne : " + name + " Type : " + str(df[column].dtype) + " Description : " + description)
+        column_data = {
+            "Nom colonne": name,
+            "Type": str(df[column].dtype),
+            "Description": description
+        }
+        output_data.append(column_data)
+
+    output_df = pd.DataFrame(output_data)
+    output_filename = "output.xlsx"
+    with pd.ExcelWriter(output_filename, engine="openpyxl") as writer:
+        output_df.to_excel(writer, index=False, sheet_name="Informations colonnes")
+    print("Les informations ont été exportées dans le fichier Excel :", output_filename)
+
+
+def graph_bar_drug(df):
+
+    drug_columns = [col for col in df.columns if 'drug' in col]
+    df_drugs = df[drug_columns].apply(lambda x: x.str.split().str[0])
+    drug_counts = df_drugs.apply(pd.Series.value_counts)
+
+    ax = drug_counts.plot(kind='bar')
+    ax.set_xticklabels(drug_counts.index, rotation=90)
+    plt.xlabel('Médicament')
+    plt.ylabel('Nombre d\'occurrences')
+    plt.title('Répartition des médicaments')
+    plt.legend(title='Colonnes')
+    plt.tight_layout()
+    plt.show()
 
 
 if __name__ == '__main__':
     df_all = pd.read_table('ds000214-download/participants.tsv')
     df_all = convert_type_all_df(df_all)
-    pretty_show_column(df_all)
+    #pretty_show_column(df_all)
     # clear_no_drug(df_all)
     df_patient = get_patient(df_all)
     df_control = get_control(df_all)
+    graph_bar_drug(df_patient)
     # numeric_columns = df_all.select_dtypes(include=['int', 'float']).columns
     # pas lisible graph_cloud_point(df_all, numeric_columns)
-    box_graph(df_patient, 'Diagramme en boite des personnes patientes')
-    box_graph(df_control, 'Diagramme en boite des personnes controlés')
+    #box_graph(df_patient, 'Diagramme en boite des personnes patientes')
+    #box_graph(df_control, 'Diagramme en boite des personnes controlés')
     # heatmap(df_patient)
 
     # histogram_phys_abuse(df_all)
