@@ -1,4 +1,7 @@
 import math
+import threading
+from pathlib import Path
+
 import nibabel as nb
 import numpy as np
 from scipy.stats import norm, kurtosis
@@ -298,3 +301,13 @@ def traitement_voxel(input_irmf):
 #    with h5py.File('results.hdf5', 'r') as f:
 #        max_y_value = f['max_y_value'][:]
 #        min_y_value = f['min_y_value'][:]
+
+if __name__ == '__main__':
+    threads = []
+
+    for file_nii in Path("mc_flirt").glob("**/*.gz"):
+        if "Cyberball" in file_nii.name:
+            traitement_voxel.traitement_voxel(file_nii)
+            thread = threading.Thread(target=BET, args=(file_nii,))
+            threads.append(thread)
+            break

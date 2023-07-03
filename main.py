@@ -86,6 +86,7 @@ def run_mcflirt(input_file):
     subprocess.run(command)
 
 def sclice_timing_correction(input_file):
+    print("START SLICE TIMING CORRECTION {}", input_file)
     folder_spacial_smoothing = "sclice_timing_correction"
     os.makedirs(folder_spacial_smoothing, exist_ok=True)  # Create the folder if it doesn't exist
     output_image = Path(folder_spacial_smoothing, file_nii.name)
@@ -129,6 +130,9 @@ def spacial_smoothing(file_nii):
     print("spacial_smoothing des tranches terminées.")
     return output_image
 
+def test(a):
+    print(a)
+    print("test")
 
 def intensity_normalization(input_file):
     folder_intensity_normalization = "intensity_normalization"
@@ -146,13 +150,16 @@ def intensity_normalization(input_file):
 
 
 if __name__ == "__main__":
+    print("z")
     tic = time.perf_counter()
 
     threads = []
 
     list_Path_ = []
     for file_nii in Path("datasetFSL").glob("**/*.nii"):
+        print("THREAD")
         if "Cyberball" in file_nii.name:
+            print("THREAD")
             thread = threading.Thread(target=sclice_timing_correction, args=(file_nii,))
             threads.append(thread)
             break
@@ -179,13 +186,12 @@ if __name__ == "__main__":
     for file_nii in Path("intensity_normalization").glob("**/*.gz"):
         if "Cyberball" in file_nii.name:
             thread = threading.Thread(target=run_mcflirt, args=(file_nii,))
-            #run_mcflirt(file_nii)
+            run_mcflirt(file_nii)
             break
 
     for file_nii in Path("mc_flirt").glob("**/*.gz"):
         if "Cyberball" in file_nii.name:
-            traitement_voxel.traitement_voxel(file_nii)
-            thread = threading.Thread(target=BET, args=(file_nii,))
+            thread = threading.Thread(target=traitement_voxel, args=(file_nii,))
             threads.append(thread)
             break
 
