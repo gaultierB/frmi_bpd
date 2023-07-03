@@ -13,6 +13,7 @@ import json
 import traitement_voxel
 import threading
 
+
 # https://socr.umich.edu/HTML5/BrainViewer/
 
 def read_mean_image(filename):
@@ -70,7 +71,7 @@ def BET(input_file):
 
     command = ['bet', input_file, output_image, "-F"]
     subprocess.run(command)
-    print("BET sont terminées.")
+    print("BET terminées.")
 
     return output_image
 
@@ -80,10 +81,10 @@ def run_mcflirt(input_file):
     os.makedirs(mc_flirt, exist_ok=True)  # Create the folder if it doesn't exist
     output_image = Path(mc_flirt, input_file.name)
 
-
     # Execute MCFLIRT
     command = ['mcflirt', '-in', input_file, '-out', output_image]
     subprocess.run(command)
+
 
 def sclice_timing_correction(input_file):
     print("START SLICE TIMING CORRECTION {}", input_file)
@@ -108,7 +109,7 @@ def sclice_timing_correction(input_file):
     # Exécutez la commande FSL
     subprocess.call(cmd, shell=True)
 
-    print("synchronisation des tranches terminées.")
+    print("synchronisation terminées.")
     return output_image
 
 
@@ -127,12 +128,14 @@ def spacial_smoothing(file_nii):
     # Exécution de la commande
     subprocess.call(fsl_cmd, shell=True)
     # Exécutez la commande FSL
-    print("spacial_smoothing des tranches terminées.")
+    print("spacial_smoothing terminées.")
     return output_image
+
 
 def test(a):
     print(a)
     print("test")
+
 
 def intensity_normalization(input_file):
     folder_intensity_normalization = "intensity_normalization"
@@ -143,45 +146,82 @@ def intensity_normalization(input_file):
     standard_deviation = subprocess.check_output("fslstats " + str(input_file) + " -s", shell=True).decode().strip()
 
     subprocess.call(
-        "fslmaths " + str(input_file) + " -sub " + str(mean_value) + " -div " + str(standard_deviation) + " " + str(output_image),
+        "fslmaths " + str(input_file) + " -sub " + str(mean_value) + " -div " + str(standard_deviation) + " " + str(
+            output_image),
         shell=True)
-    print("intensity_normalization des tranches terminées.")
+    print("intensity_normalization terminées.")
     return output_image
 
 
 if __name__ == "__main__":
-    print("z")
     tic = time.perf_counter()
 
-    threads = []
+    sclice_timing_correction_threads = []
 
     list_Path_ = []
     for file_nii in Path("datasetFSL").glob("**/*.nii"):
-        print("THREAD")
         if "Cyberball" in file_nii.name:
-            print("THREAD")
             thread = threading.Thread(target=sclice_timing_correction, args=(file_nii,))
-            threads.append(thread)
+            sclice_timing_correction_threads.append(thread)
             break
 
+    # Lance tous les threads
+    for thread in sclice_timing_correction_threads:
+        thread.start()
+
+    # Attend la fin de tous les threads
+    for thread in sclice_timing_correction_threads:
+        thread.join()
+
+    bet_threads = []
 
     for file_nii in Path("sclice_timing_correction").glob("*nii.gz"):
         if "Cyberball" in file_nii.name:
             thread = threading.Thread(target=BET, args=(file_nii,))
-            threads.append(thread)
+            bet_threads.append(thread)
             break
+
+    # Lance tous les threads
+    for thread in bet_threads:
+        thread.start()
+
+    # Attend la fin de tous les threads
+    for thread in bet_threads:
+        thread.join()
+
+    spacial_smoothing_threads = []
 
     for file_nii in Path("bet").glob("**/*.gz"):
         if "Cyberball" in file_nii.name:
             thread = threading.Thread(target=spacial_smoothing, args=(file_nii,))
-            threads.append(thread)
+            spacial_smoothing_threads.append(thread)
             break
+
+    # Lance tous les threads
+    for thread in spacial_smoothing_threads:
+        thread.start()
+
+    # Attend la fin de tous les threads
+    for thread in spacial_smoothing_threads:
+        thread.join()
+
+    intensity_normalization_threads = []
 
     for file_nii in Path("spacial_smoothing").glob("**/*.gz"):
         if "Cyberball" in file_nii.name:
             thread = threading.Thread(target=intensity_normalization, args=(file_nii,))
-            threads.append(thread)
+            intensity_normalization_threads.append(thread)
             break
+
+    # Lance tous les threads
+    for thread in intensity_normalization_threads:
+        thread.start()
+
+    # Attend la fin de tous les threads
+    for thread in intensity_normalization_threads:
+        thread.join()
+
+    run_mcflirt_threads = []
 
     for file_nii in Path("intensity_normalization").glob("**/*.gz"):
         if "Cyberball" in file_nii.name:
@@ -189,20 +229,22 @@ if __name__ == "__main__":
             run_mcflirt(file_nii)
             break
 
-    for file_nii in Path("mc_flirt").glob("**/*.gz"):
-        if "Cyberball" in file_nii.name:
-            thread = threading.Thread(target=traitement_voxel, args=(file_nii,))
-            threads.append(thread)
-            break
-
     # Lance tous les threads
-    for thread in threads:
+    for thread in run_mcflirt_threads:
         thread.start()
 
     # Attend la fin de tous les threads
-    for thread in threads:
+    for thread in run_mcflirt_threads:
         thread.join()
 
+    run_mcflirt_threads = []
+
+
+    for file_nii in Path("mc_flirt").glob("**/*.gz"):
+        if "Cyberball" in file_nii.name:
+            #thread = threading.Thread(target=traitement_voxel, args=(file_nii,))
+            #threads.append(thread)
+            break
 
     toc = time.perf_counter()
     print(f"Finish in {toc - tic:0.4f} seconds")
