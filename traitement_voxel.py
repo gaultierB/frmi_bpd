@@ -1,4 +1,6 @@
 import math
+import multiprocessing
+from multiprocessing import Pool
 
 import nibabel as nb
 import numpy as np
@@ -259,27 +261,36 @@ def calculate_std_peak_intensities(image_data):
 
     return std_intensity_array
 
+def execute_function(args):
+    func, data = args
+    return func(data)
+
 
 def traitement_voxel(input_irmf):
     img = load_img(input_irmf)
     data = img.get_fdata()
-    # draw_3d_volumes(data[:, :, :, 10])
-    max_y_value = max_y(data)
-    min_y_value = min_y(data)
-    average_intensity_value = average_intensity(data)
-    std_deviation = standard_deviation(data)
-    skewness = skew(data, axis=3)
-    e = kurtosis(data, axis=3)
-    # Calculate the local maxima for each voxel
-    local_maxima_count = calculate_local_maxima(data)
-    # Calculate the peaks per timeframe
-    # peaks_per_timeframe = calculate_peaks_per_timeframe(data, local_maxima_count)
-    skewness_of_highest_peak = calculate_skewness_of_highest_peak(data)
-    kurtosis_of_highest_peak = calculate_kurtosis_of_highest_peak(data)
-    # Calculate the standard deviation of the peak intervals for each voxel
-    std_of_peak_intervals = calculate_std_of_peak_intervals(data)
-    average_peak_intensities = calculate_average_peak_intensities(data)
-    std_peak_intensities = calculate_std_peak_intensities(data)
+    functions = [
+        (max_y, {}),
+        (min_y, {}),
+        (average_intensity, {}),
+        (standard_deviation, {}),
+        (skew, {'axis': 3}),
+        (kurtosis, {'axis': 3}),
+        (calculate_local_maxima, {}),
+        (calculate_skewness_of_highest_peak, {}),
+        (calculate_kurtosis_of_highest_peak, {}),
+        (calculate_std_of_peak_intervals, {}),
+        (calculate_average_peak_intensities, {}),
+        (calculate_std_peak_intensities, {})
+    ]
+
+    # Create a multiprocessing Pool
+    with Pool(multiprocessing.cpu_count()) as p:
+        results = p.map(execute_function, [(func, data, kwargs) for func, kwargs in functions])
+
+    # Unpack results
+    max_y_value, min_y_value, average_intensity_value, std_deviation, skewness, e, local_maxima_count, skewness_of_highest_peak, kurtosis_of_highest_peak, std_of_peak_intervals, average_peak_intensities, std_peak_intensities = results
+
     with h5py.File('results.hdf5', 'w') as f:
         f.create_dataset('max_y_value', data=max_y_value)
         f.create_dataset('min_y_value', data=min_y_value)

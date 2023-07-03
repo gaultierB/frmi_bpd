@@ -104,7 +104,6 @@ def sclice_timing_correction(input_file):
     # Exécutez la commande FSL
     subprocess.call(cmd, shell=True)
 
-    print("Toutes les corrections de synchronisation des tranches sont terminées.")
     return output_image
 
 
@@ -147,33 +146,43 @@ if __name__ == "__main__":
         if "Cyberball" in file_nii.name:
             path_sclice_timing_correction = sclice_timing_correction(file_nii)
             break
+    print("Toutes les corrections de synchronisation des tranches sont terminées.")
+
     for file_nii in Path("sclice_timing_correction").glob("*nii.gz"):
         if "Cyberball" in file_nii.name:
             bet_filename = BET(file_nii)
             break
+    print("bet terminée.")
 
     for file_nii in Path("bet").glob("**/*.gz"):
         if "Cyberball" in file_nii.name:
             path_spacial_smoothing = spacial_smoothing(file_nii)
             break
+    print("path_spacial_smoothing terminé")
 
     for file_nii in Path("spacial_smoothing").glob("**/*.gz"):
         if "Cyberball" in file_nii.name:
             intensity_normalization(file_nii)
             break
+    print("intensity_normalization terminé")
+
 
     for file_nii in Path("intensity_normalization").glob("**/*.gz"):
         if "Cyberball" in file_nii.name:
             run_mcflirt(file_nii)
             break
+    print("mc_flirt terminé")
 
     for file_nii in Path("mc_flirt").glob("**/*.gz"):
         if "Cyberball" in file_nii.name:
             traitement_voxel.traitement_voxel(file_nii)
             break
+    print("traitement_voxel terminé")
 
     toc = time.perf_counter()
     print(f"Downloaded the tutorial in {toc - tic:0.4f} seconds")
 
 # export FSLDIR=/usr/local/fsl
+# export FSLDIR=/var/fsl
 # source /usr/local/fsl/etc/fslconf/fsl.sh
+# source /var/fsl/etc/fslconf/fsl.sh
