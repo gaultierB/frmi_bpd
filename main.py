@@ -205,7 +205,7 @@ if __name__ == "__main__":
 
 
     toc = time.perf_counter()
-    print(f"Downloaded the tutorial in {toc - tic:0.4f} seconds")
+    print(f"Finish in {toc - tic:0.4f} seconds")
 
 # export FSLDIR=/usr/local/fsl
 # source /usr/local/fsl/etc/fslconf/fsl.sh
