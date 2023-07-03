@@ -146,17 +146,21 @@ if __name__ == "__main__":
     for file_nii in Path("datasetFSL").glob("**/*.nii"):
         if "Cyberball" in file_nii.name:
             path_sclice_timing_correction = sclice_timing_correction(file_nii)
+            break
     for file_nii in Path("sclice_timing_correction").glob("*nii.gz"):
         if "Cyberball" in file_nii.name:
             bet_filename = BET(file_nii)
+            break
 
     for file_nii in Path("bet").glob("**/*.gz"):
         if "Cyberball" in file_nii.name:
             path_spacial_smoothing = spacial_smoothing(file_nii)
+            break
 
     for file_nii in Path("spacial_smoothing").glob("**/*.gz"):
         if "Cyberball" in file_nii.name:
             intensity_normalization(file_nii)
+            break
 
     for file_nii in Path("intensity_normalization").glob("**/*.gz"):
         if "Cyberball" in file_nii.name:
@@ -166,6 +170,7 @@ if __name__ == "__main__":
     for file_nii in Path("mc_flirt").glob("**/*.gz"):
         if "Cyberball" in file_nii.name:
             traitement_voxel.traitement_voxel(file_nii)
+            break
 
     toc = time.perf_counter()
     print(f"Downloaded the tutorial in {toc - tic:0.4f} seconds")
