@@ -306,6 +306,6 @@ def traitement_voxel(input_irmf):
         f.create_dataset('std_peak_intensities', data=std_peak_intensities)
 
     #READ DATA
-    with h5py.File('results.hdf5', 'r') as f:
-        max_y_value = f['max_y_value'][:]
-        min_y_value = f['min_y_value'][:]
+#    with h5py.File('results.hdf5', 'r') as f:
+#        max_y_value = f['max_y_value'][:]
+#        min_y_value = f['min_y_value'][:]
