@@ -329,22 +329,29 @@ def traitement_voxel(input_irmf):
     toc = time.perf_counter()
     print(f"Finish kurtosis in {toc - tic:0.4f} seconds")
 
-    #with h5py.File('results.hdf5', 'w') as f:
-    #    f.create_dataset('max_y_value', data=max_y_value)
-    #    f.create_dataset('min_y_value', data=min_y_value)
-    #    f.create_dataset('average_intensity_value', data=average_intensity_value)
-    #    f.create_dataset('std_deviation', data=std_deviation)
-    #    f.create_dataset('skewness', data=skewness)
-    #    f.create_dataset('e', data=e)
-    #    f.create_dataset('local_maxima_count', data=local_maxima_count)
-    #    f.create_dataset('skewness_of_highest_peak', data=skewness_of_highest_peak)
-    #    f.create_dataset('kurtosis_of_highest_peak', data=kurtosis_of_highest_peak)
-    #    f.create_dataset('std_of_peak_intervals', data=std_of_peak_intervals)
-    #    f.create_dataset('average_peak_intensities', data=average_peak_intensities)
-    #    f.create_dataset('std_peak_intensities', data=std_peak_intensities)
+    with h5py.File('results.hdf5', 'w') as f:
+        f.create_dataset('max_y_value', data=max_y_value)
+        f.create_dataset('min_y_value', data=min_y_value)
+        f.create_dataset('average_intensity_value', data=average_intensity_value)
+        f.create_dataset('std_deviation', data=std_deviation)
+        f.create_dataset('skewness', data=skewness)
+        f.create_dataset('e', data=e)
+        f.create_dataset('local_maxima_count', data=local_maxima_count)
+        f.create_dataset('skewness_of_highest_peak', data=skewness_of_highest_peak)
+        f.create_dataset('kurtosis_of_highest_peak', data=kurtosis_of_highest_peak)
+        f.create_dataset('std_of_peak_intervals', data=std_of_peak_intervals)
+        f.create_dataset('average_peak_intensities', data=average_peak_intensities)
+        f.create_dataset('std_peak_intensities', data=std_peak_intensities)
 
     # READ DATA
 #    with h5py.File('results.hdf5', 'r') as f:
 #        max_y_value = f['max_y_value'][:]
 #        min_y_value = f['min_y_value'][:]
 
+
+if __name__ == "__main__":
+    sclice_timing_correction_threads = []
+
+    for file_nii in Path("mc_flirt").glob("**/*.gz"):
+        if "Cyberball" in file_nii.name:
+            traitement_voxel(file_nii)

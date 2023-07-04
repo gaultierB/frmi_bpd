@@ -213,7 +213,7 @@ if __name__ == "__main__":
     for file_nii in Path("intensity_normalization").glob("**/*.gz"):
         if "Cyberball" in file_nii.name:
             thread = threading.Thread(target=run_mcflirt, args=(file_nii,))
-            run_mcflirt(file_nii)
+            run_mcflirt_threads.append(thread)
 
     # Lance tous les threads
     for thread in run_mcflirt_threads:
