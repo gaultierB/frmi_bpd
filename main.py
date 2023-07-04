@@ -71,7 +71,7 @@ def BET(input_file):
 
     command = ['bet', input_file, output_image, "-F"]
     subprocess.run(command)
-    print("BET terminées. " + input_file)
+    print("BET terminées. " + input_file.name)
 
     return output_image
 
@@ -85,14 +85,13 @@ def run_mcflirt(input_file):
     command = ['mcflirt', '-in', input_file, '-out', output_image]
     subprocess.run(command)
 
-    print("Run mcflirt " + input_file)
+    print("Run mcflirt " + input_file.name)
 
 
 def sclice_timing_correction(input_file):
     folder_spacial_smoothing = "sclice_timing_correction"
     os.makedirs(folder_spacial_smoothing, exist_ok=True)  # Create the folder if it doesn't exist
     output_image = Path(folder_spacial_smoothing, file_nii.name)
-
 
     tr = 3.0  # Temps de répétition (TR) en secondes
     ta = 1.0  # Temps d'acquisition (TA) de chaque tranche en secondes
@@ -107,7 +106,7 @@ def sclice_timing_correction(input_file):
     # Exécutez la commande FSL
     subprocess.call(cmd, shell=True)
 
-    print("synchronisation terminées.{}", input_file)
+    print("synchronisation terminées.{}", input_file.name)
     return output_image
 
 
@@ -126,8 +125,9 @@ def spacial_smoothing(file_nii):
     # Exécution de la commande
     subprocess.call(fsl_cmd, shell=True)
     # Exécutez la commande FSL
-    print("spacial_smoothing terminées.")
+    print("spacial_smoothing terminées." + file_nii.name)
     return output_image
+
 
 def intensity_normalization(input_file):
     folder_intensity_normalization = "intensity_normalization"
@@ -141,7 +141,7 @@ def intensity_normalization(input_file):
         "fslmaths " + str(input_file) + " -sub " + str(mean_value) + " -div " + str(standard_deviation) + " " + str(
             output_image),
         shell=True)
-    print("intensity_normalization terminées. " + input_file)
+    print("intensity_normalization terminées. " + input_file.name)
     return output_image
 
 
@@ -152,9 +152,13 @@ if __name__ == "__main__":
 
     list_Path_ = []
     for file_nii in Path("datasetFSL").glob("**/*.nii"):
-        if "Cyberball" in file_nii.name:
-            thread = threading.Thread(target=sclice_timing_correction, args=(file_nii,))
-            sclice_timing_correction_threads.append(thread)
+            if not os.path.exists("sclice_timing_correction"):
+                os.makedirs("sclice_timing_correction")
+            if file_nii.name + ".gz" not in os.listdir("sclice_timing_correction"):
+                thread = threading.Thread(target=sclice_timing_correction, args=(file_nii,))
+                sclice_timing_correction_threads.append(thread)
+            else:
+                print("Already processed sclice_timing_correction OK " + file_nii.name)
 
     # Lance tous les threads
     for thread in sclice_timing_correction_threads:
@@ -168,8 +172,13 @@ if __name__ == "__main__":
 
     for file_nii in Path("sclice_timing_correction").glob("*nii.gz"):
         if "Cyberball" in file_nii.name:
-            thread = threading.Thread(target=BET, args=(file_nii,))
-            bet_threads.append(thread)
+            if not os.path.exists("bet"):
+                os.makedirs("bet")
+            if file_nii.name not in os.listdir("bet"):
+                thread = threading.Thread(target=BET, args=(file_nii,))
+                #bet_threads.append(thread)
+            else:
+                print("Already processed bet OK " + file_nii.name)
 
     # Lance tous les threads
     for thread in bet_threads:
@@ -181,10 +190,15 @@ if __name__ == "__main__":
 
     spacial_smoothing_threads = []
 
-    for file_nii in Path("bet").glob("**/*.gz"):
-        if "Cyberball" in file_nii.name:
-            thread = threading.Thread(target=spacial_smoothing, args=(file_nii,))
-            spacial_smoothing_threads.append(thread)
+    for file_nii in Path("bet").glob("**/*_mask.nii.gz"):
+        if "-Cyberball_bold" in file_nii.name:
+            if not os.path.exists("spacial_smoothing"):
+                os.makedirs("spacial_smoothing")
+            if file_nii.name not in os.listdir("spacial_smoothing"):
+                thread = threading.Thread(target=spacial_smoothing, args=(file_nii,))
+                spacial_smoothing_threads.append(thread)
+            else:
+                print("Already processed spacial_smoothing OK" + file_nii.name)
 
     # Lance tous les threads
     for thread in spacial_smoothing_threads:
@@ -198,8 +212,14 @@ if __name__ == "__main__":
 
     for file_nii in Path("spacial_smoothing").glob("**/*.gz"):
         if "Cyberball" in file_nii.name:
-            thread = threading.Thread(target=intensity_normalization, args=(file_nii,))
-            intensity_normalization_threads.append(thread)
+            if not os.path.exists("intensity_normalization"):
+                os.makedirs("intensity_normalization")
+
+            if file_nii.name not in os.listdir("intensity_normalization"):
+                thread = threading.Thread(target=intensity_normalization, args=(file_nii,))
+                intensity_normalization_threads.append(thread)
+            else:
+                print("Already processed intensity_normalization OK " + file_nii.name)
 
     # Lance tous les threads
     for thread in intensity_normalization_threads:
@@ -212,8 +232,14 @@ if __name__ == "__main__":
     run_mcflirt_threads = []
     for file_nii in Path("intensity_normalization").glob("**/*.gz"):
         if "Cyberball" in file_nii.name:
-            thread = threading.Thread(target=run_mcflirt, args=(file_nii,))
-            run_mcflirt(file_nii)
+            if not os.path.exists("mc_flirt"):
+                os.makedirs("mc_flirt")
+
+            if file_nii.name not in os.listdir("mc_flirt"):
+                thread = threading.Thread(target=run_mcflirt, args=(file_nii,))
+                run_mcflirt_threads.append(thread)
+            else:
+                print("Already processed run_mcflirt OK" + file_nii.name)
 
     # Lance tous les threads
     for thread in run_mcflirt_threads:
@@ -226,8 +252,9 @@ if __name__ == "__main__":
 
     for file_nii in Path("mc_flirt").glob("**/*.gz"):
         if "Cyberball" in file_nii.name:
-            traitement_voxel(file_nii)
-
+            print("no traitement voxel")
+            # traitement_voxel(file_nii)
+        break
     toc = time.perf_counter()
     print(f"Finish in {toc - tic:0.4f} seconds")
 
