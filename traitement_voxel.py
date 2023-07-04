@@ -350,8 +350,11 @@ def traitement_voxel(input_irmf):
 
 
 if __name__ == "__main__":
+
     sclice_timing_correction_threads = []
 
     for file_nii in Path("mc_flirt").glob("**/*.gz"):
         if "Cyberball" in file_nii.name:
+            print(file_nii)
             traitement_voxel(file_nii)
+            break
