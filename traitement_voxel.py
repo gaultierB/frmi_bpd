@@ -359,4 +359,3 @@ if __name__ == "__main__":
         if "Cyberball" in file_nii.name:
             print(file_nii)
             traitement_voxel(file_nii)
-            break
