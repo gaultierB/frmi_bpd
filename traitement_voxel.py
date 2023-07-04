@@ -300,34 +300,34 @@ def traitement_voxel(input_irmf):
     tic = time.perf_counter()
     local_maxima_count = calculate_local_maxima(data)
     toc = time.perf_counter()
-    print(f"Finish kurtosis in {toc - tic:0.4f} seconds")
+    print(f"Finish local_maxima_count in {toc - tic:0.4f} seconds")
 
     # Calculate the peaks per timeframe
     # peaks_per_timeframe = calculate_peaks_per_timeframe(data, local_maxima_count)
     tic = time.perf_counter()
     skewness_of_highest_peak = calculate_skewness_of_highest_peak(data)
     toc = time.perf_counter()
-    print(f"Finish kurtosis in {toc - tic:0.4f} seconds")
+    print(f"Finish skewness_of_highest_peak in {toc - tic:0.4f} seconds")
 
     tic = time.perf_counter()
     kurtosis_of_highest_peak = calculate_kurtosis_of_highest_peak(data)
     toc = time.perf_counter()
-    print(f"Finish kurtosis in {toc - tic:0.4f} seconds")
+    print(f"Finish kurtosis_of_highest_peak in {toc - tic:0.4f} seconds")
 
     # Calculate the standard deviation of the peak intervals for each voxel
     tic = time.perf_counter()
     std_of_peak_intervals = calculate_std_of_peak_intervals(data)
     toc = time.perf_counter()
-    print(f"Finish kurtosis in {toc - tic:0.4f} seconds")
+    print(f"Finish std_of_peak_intervals in {toc - tic:0.4f} seconds")
 
     tic = time.perf_counter()
     average_peak_intensities = calculate_average_peak_intensities(data)
     toc = time.perf_counter()
-    print(f"Finish kurtosis in {toc - tic:0.4f} seconds")
+    print(f"Finish average_peak_intensities in {toc - tic:0.4f} seconds")
 
     std_peak_intensities = calculate_std_peak_intensities(data)
     toc = time.perf_counter()
-    print(f"Finish kurtosis in {toc - tic:0.4f} seconds")
+    print(f"Finish std_peak_intensities in {toc - tic:0.4f} seconds")
 
     with h5py.File('results.hdf5', 'w') as f:
         f.create_dataset('max_y_value', data=max_y_value)
