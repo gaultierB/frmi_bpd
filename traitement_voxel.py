@@ -331,7 +331,6 @@ def traitement_voxel(input_irmf):
     print(f"Finish std_peak_intensities in {toc - tic:0.4f} seconds")
 
     with h5py.File('results.hdf5', 'w') as f:
-        f.create_dataset('file_name', data=input_irmf)
         f.create_dataset('max_y_value', data=max_y_value)
         f.create_dataset('min_y_value', data=min_y_value)
         f.create_dataset('average_intensity_value', data=average_intensity_value)
