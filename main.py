@@ -85,17 +85,17 @@ def run_mcflirt(input_file):
     command = ['mcflirt', '-in', input_file, '-out', output_image]
     subprocess.run(command)
 
-    print("Run mcflirt " + input_file.name)
+    print("MCFLIRT Terminé " + input_file.name)
 
 
 def sclice_timing_correction(input_file):
     folder_spacial_smoothing = "sclice_timing_correction"
     os.makedirs(folder_spacial_smoothing, exist_ok=True)  # Create the folder if it doesn't exist
-    output_image = Path(folder_spacial_smoothing, file_nii.name)
+    output_image = Path(folder_spacial_smoothing, input_file.name)
 
     tr = 3.0  # Temps de répétition (TR) en secondes
     ta = 1.0  # Temps d'acquisition (TA) de chaque tranche en secondes
-    interleaved = True  # True si vos tranches sont acquises de manière entrelacée, False sinon
+    interleaved = True
 
     # Construisez la commande FSL pour la correction de synchronisation des tranches
     slice_timing_correction_config = Path("ds000214-download", "slice_timing_correction.txt")
@@ -106,11 +106,9 @@ def sclice_timing_correction(input_file):
     # Exécutez la commande FSL
     subprocess.call(cmd, shell=True)
 
-    print("synchronisation terminées.{}", input_file.name)
+    print("synchronisation terminées. ", input_file.name)
     return output_image
 
-
-# /mnt/c/Users/gault/PycharmProjects/frmi_bpd/datasetFSL/Control/IMAGE
 
 def spacial_smoothing(file_nii):
     folder_spacial_smoothing = "spacial_smoothing"
@@ -132,7 +130,7 @@ def spacial_smoothing(file_nii):
 def intensity_normalization(input_file):
     folder_intensity_normalization = "intensity_normalization"
     os.makedirs(folder_intensity_normalization, exist_ok=True)  # Create the folder if it doesn't exist
-    output_image = Path(folder_intensity_normalization, file_nii.name)
+    output_image = Path(folder_intensity_normalization, input_file.name)
 
     mean_value = subprocess.check_output("fslstats " + str(input_file) + " -M", shell=True).decode().strip()
     standard_deviation = subprocess.check_output("fslstats " + str(input_file) + " -s", shell=True).decode().strip()
@@ -148,10 +146,12 @@ def intensity_normalization(input_file):
 if __name__ == "__main__":
     tic = time.perf_counter()
 
+
+    ### SLICE TIMING ###
     sclice_timing_correction_threads = []
 
     list_Path_ = []
-    for file_nii in Path("datasetFSL").glob("**/*.nii"):
+    for file_nii in Path("datasetFSL").glob("**/*bold.nii"):
             if not os.path.exists("sclice_timing_correction"):
                 os.makedirs("sclice_timing_correction")
             if file_nii.name + ".gz" not in os.listdir("sclice_timing_correction"):
@@ -168,15 +168,16 @@ if __name__ == "__main__":
     for thread in sclice_timing_correction_threads:
         thread.join()
 
-    bet_threads = []
 
+    ### BET  ###
+    bet_threads = []
     for file_nii in Path("sclice_timing_correction").glob("*nii.gz"):
         if "Cyberball" in file_nii.name:
             if not os.path.exists("bet"):
                 os.makedirs("bet")
             if file_nii.name not in os.listdir("bet"):
                 thread = threading.Thread(target=BET, args=(file_nii,))
-                #bet_threads.append(thread)
+                bet_threads.append(thread)
             else:
                 print("Already processed bet OK " + file_nii.name)
 
@@ -188,6 +189,7 @@ if __name__ == "__main__":
     for thread in bet_threads:
         thread.join()
 
+    ### SPACIAL SMOOTHING ###
     spacial_smoothing_threads = []
 
     for file_nii in Path("bet").glob("**/*_mask.nii.gz"):
@@ -207,6 +209,8 @@ if __name__ == "__main__":
     # Attend la fin de tous les threads
     for thread in spacial_smoothing_threads:
         thread.join()
+
+    ### INTENSITY NORMALIZATION ###
 
     intensity_normalization_threads = []
 
@@ -228,6 +232,8 @@ if __name__ == "__main__":
     # Attend la fin de tous les threads
     for thread in intensity_normalization_threads:
         thread.join()
+
+    ### MC FLIRT ###
 
     run_mcflirt_threads = []
     for file_nii in Path("intensity_normalization").glob("**/*.gz"):
@@ -259,4 +265,6 @@ if __name__ == "__main__":
     print(f"Finish in {toc - tic:0.4f} seconds")
 
 # export FSLDIR=/usr/local/fsl
+# export FSLDIR=/var/fsl
 # source /usr/local/fsl/etc/fslconf/fsl.sh
+# source /var/fsl/etc/fslconf/fsl.sh
