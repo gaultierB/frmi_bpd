@@ -192,7 +192,7 @@ if __name__ == "__main__":
     ### SPACIAL SMOOTHING ###
     spacial_smoothing_threads = []
 
-    for file_nii in Path("bet").glob("**/*_mask.nii.gz"):
+    for file_nii in Path("bet").glob("**/*_bold.nii.gz"):
         if "-Cyberball_bold" in file_nii.name:
             if not os.path.exists("spacial_smoothing"):
                 os.makedirs("spacial_smoothing")
