@@ -201,16 +201,12 @@ def calculate_std_of_peak_intervals(image_data):
 
 
 def calculate_average_peak_intensity(voxel_timeseries):
-    # Calculate the local maxima
     local_maxima = argrelextrema(voxel_timeseries, np.greater)[0]
-
     # Calculate the y-values of the local maxima
     peak_intensities = voxel_timeseries[local_maxima]
 
     # Calculate the average intensity
-    average_intensity = np.nanmean(peak_intensities)
-
-    return average_intensity
+    return np.nanmean(peak_intensities)
 
 
 def calculate_average_peak_intensities(image_data):
@@ -223,9 +219,8 @@ def calculate_average_peak_intensities(image_data):
             for k in range(image_data.shape[2]):
                 # Get the timeseries for the current voxel
                 voxel_timeseries = image_data[i, j, k, :]
-
                 # Check if the timeseries is not empty
-                if np.any(voxel_timeseries):
+                if ~np.all(voxel_timeseries == voxel_timeseries[0]):
                     # Calculate the average peak intensity
                     avg_intensity = calculate_average_peak_intensity(voxel_timeseries)
 
@@ -244,7 +239,6 @@ def calculate_std_peak_intensity(voxel_timeseries):
 
     # Calculate the y-values of the local maxima
     peak_intensities = voxel_timeseries[local_maxima]
-
     # Calculate the standard deviation of the intensities
     std_intensity = np.std(peak_intensities)
 
@@ -261,12 +255,14 @@ def calculate_std_peak_intensities(image_data):
             for k in range(image_data.shape[2]):
                 # Get the timeseries for the current voxel
                 voxel_timeseries = image_data[i, j, k, :]
+                if np.any(voxel_timeseries != voxel_timeseries[0]):
+                    # Calculate the standard deviation of the peak intensity
+                    std_intensity = calculate_std_peak_intensity(voxel_timeseries)
 
-                # Calculate the standard deviation of the peak intensity
-                std_intensity = calculate_std_peak_intensity(voxel_timeseries)
-
-                # Store the standard deviation for the current voxel
-                std_intensity_array[i, j, k] = std_intensity
+                    # Store the standard deviation for the current voxel
+                    std_intensity_array[i, j, k] = std_intensity
+                else:
+                    std_intensity_array[i, j, k] = np.nan
 
     return std_intensity_array
 
@@ -354,30 +350,32 @@ def traitement_voxel(input_irmf):
     toc = time.perf_counter()
     print(f"Finish average_peak_intensities in {toc - tic:0.4f} seconds")
 
-    # std_peak_intensities = calculate_std_peak_intensities(data)
+    tic = time.perf_counter()
+    std_peak_intensities = calculate_std_peak_intensities(data)
+    result["std_peak_intensities"] = std_peak_intensities
     toc = time.perf_counter()
-    # TODO FIX
     print(f"Finish std_peak_intensities in {toc - tic:0.4f} seconds")
 
     print("CALCUL FINISHED")
     traitement_voxel_result[input_irmf.name] = result
-    #return result
 
 
 def writeResult(result):
     with h5py.File('results.hdf5', 'w') as f:
-        f.create_dataset('max_y_value', data=result["max_y_value"])
-        f.create_dataset('min_y_value', data=result["min_y_value"])
-        f.create_dataset('average_intensity_value', data=result["average_intensity_value"])
-        f.create_dataset('std_deviation', data=result["std_deviation"])
-        f.create_dataset('skewness', data=result["skewness"])
-        f.create_dataset('kurtosis_value', data=result["kurtosis_value"])
-        f.create_dataset('local_maxima_count', data=result["local_maxima_count"])
-        f.create_dataset('skewness_of_highest_peak', data=result["skewness_of_highest_peak"])
-        f.create_dataset('kurtosis_of_highest_peak', data=result["kurtosis_of_highest_peak"])
-        f.create_dataset('std_of_peak_intervals', data=result["std_of_peak_intervals"])
-        # f.create_dataset('average_peak_intensities', data=result["average_peak_intensities"])
-        # f.create_dataset('std_peak_intensities', data=std_peak_intensities)
+        grp = f.create_group(file_nii)
+
+        grp.create_dataset('max_y_value', data=result["max_y_value"])
+        grp.create_dataset('min_y_value', data=result["min_y_value"])
+        grp.create_dataset('average_intensity_value', data=result["average_intensity_value"])
+        grp.create_dataset('std_deviation', data=result["std_deviation"])
+        grp.create_dataset('skewness', data=result["skewness"])
+        grp.create_dataset('kurtosis_value', data=result["kurtosis_value"])
+        grp.create_dataset('local_maxima_count', data=result["local_maxima_count"])
+        grp.create_dataset('skewness_of_highest_peak', data=result["skewness_of_highest_peak"])
+        grp.create_dataset('kurtosis_of_highest_peak', data=result["kurtosis_of_highest_peak"])
+        grp.create_dataset('std_of_peak_intervals', data=result["std_of_peak_intervals"])
+        grp.create_dataset('average_peak_intensities', data=result["average_peak_intensities"])
+        grp.create_dataset('std_peak_intensities', data=result["std_peak_intensities"])
 
     # READ DATA
 
@@ -396,7 +394,6 @@ if __name__ == "__main__":
             # Lance tous les threads
             thread = threading.Thread(target=traitement_voxel, args=(file_nii,))
             threads.append(thread)
-            break
 
     for thread in threads:
         thread.start()
