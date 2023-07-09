@@ -2,7 +2,7 @@ from pathlib import Path
 import main
 
 if __name__ == "__main__":
-    a = Path("/var/dev/frmi_bpd/datasetFSL/Control/.nii")
+    a = Path("datasetFSL/Control/sub-EESS001_task-Cyberball_bold.nii")
     print(a.name)
     main.sclice_timing_correction(a)
     main.BET(a)

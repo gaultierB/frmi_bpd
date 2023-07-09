@@ -4,6 +4,7 @@ from pathlib import Path
 
 import nibabel as nb
 import numpy as np
+import SimpleITK as sitk
 from scipy.stats import norm, kurtosis
 from scipy.stats import skew
 from scipy.signal import find_peaks
@@ -16,6 +17,7 @@ import nibabel as nib
 from scipy.signal import argrelextrema
 import time
 import h5py
+from scipy.stats import pearsonr
 
 
 def load_img(filename):
@@ -275,10 +277,27 @@ def traitement_voxel(input_irmf):
 
     img = load_img(input_irmf)
     data = img.get_fdata()
+
+    seed_point = (10, 50, 50)
+    #TURN IMAGE
+    lower_threshold = 100
+    upper_threshold = 200
+    image = sitk.ReadImage(input_irmf)
+
+    segmented_images = []
+    for volume in range(0, 341):
+        volume_image = image[..., volume]  # Extract the volume
+
+        segmented_volume = region_growing(volume_image, seed_point, lower_threshold, upper_threshold)
+        segmented_array = sitk.GetArrayFromImage(segmented_volume)
+        segmented_images.append(segmented_array)
+
+    segmented_images = np.array(segmented_images)
+    data = segmented_images
+
     # draw_3d_volumes(data[:, :, :, 10])
     tic_init = time.perf_counter()
     print("--------------")
-    print(data.shape)
     max_y_value = max_y(data)
     result["max_y_value"] = max_y_value
     toc = time.perf_counter()
@@ -360,9 +379,40 @@ def traitement_voxel(input_irmf):
     traitement_voxel_result[input_irmf.name] = result
 
 
+def region_growing(image, seed_point, lower_threshold, upper_threshold):
+    # Create a binary mask to store the segmented region
+    segmented_region = sitk.Image(image.GetSize(), sitk.sitkUInt8)
+    segmented_region.CopyInformation(image)
+    segmented_region_array = sitk.GetArrayViewFromImage(segmented_region)
+    # Create a queue to store the neighboring points
+    seed_queue = []
+    seed_queue.append(seed_point)
+    # Perform region growing
+    while seed_queue:
+        current_point = seed_queue.pop(0)
+        current_value = image.GetPixel(current_point[::-1])
+        if segmented_region_array[current_point] == 0 and lower_threshold <= current_value <= upper_threshold:
+            segmented_region_array[current_point] = 1
+
+            # Get neighboring points
+            neighbors = [(current_point[0] + 1, current_point[1], current_point[2]),
+                         (current_point[0] - 1, current_point[1], current_point[2]),
+                         (current_point[0], current_point[1] + 1, current_point[2]),
+                         (current_point[0], current_point[1] - 1, current_point[2]),
+                         (current_point[0], current_point[1], current_point[2] + 1),
+                         (current_point[0], current_point[1], current_point[2] - 1)]
+
+            # Add neighboring points to the queue
+            for neighbor in neighbors:
+                if segmented_region_array[neighbor] == 0:
+                    seed_queue.append(neighbor)
+
+    return segmented_region
+
+
 def writeResult(result):
-    with h5py.File('results.hdf5', 'w') as f:
-        grp = f.create_group(file_nii)
+    with h5py.File('results_growing.hdf5', 'w') as f:
+        grp = f.create_group(file_nii.name)
 
         grp.create_dataset('max_y_value', data=result["max_y_value"])
         grp.create_dataset('min_y_value', data=result["min_y_value"])
@@ -376,13 +426,6 @@ def writeResult(result):
         grp.create_dataset('std_of_peak_intervals', data=result["std_of_peak_intervals"])
         grp.create_dataset('average_peak_intensities', data=result["average_peak_intensities"])
         grp.create_dataset('std_peak_intensities', data=result["std_peak_intensities"])
-
-    # READ DATA
-
-
-#    with h5py.File('results.hdf5', 'r') as f:
-#        max_y_value = f['max_y_value'][:]
-#        min_y_value = f['min_y_value'][:]
 
 
 if __name__ == "__main__":
