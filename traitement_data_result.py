@@ -13,7 +13,7 @@ if __name__ == "__main__":
             # Parcourir chaque clé dans le groupe
             for key_name in group.keys():
                 data = np.array(group[key_name])
-                print(data.shape)
+                print(data)
                 print(data[45][34][10])
                 # Calculer la matrice de corrélation
                 correlation_matrix = np.corrcoef(data[45][34][10], rowvar=False)
